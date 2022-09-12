@@ -158,7 +158,6 @@ gs \
   -dQUIET -dBATCH -dNOPAUSE -dNOOUTERSAVE \
   -dPDFA=3 -dCompatibilityLevel=1.7 -dPDFACompatibilityPolicy=1 \
   -sColorConversionStrategy=RGB \
-  --permit-file-read="$ISDOC" --permit-file-read="$ICCFILE" --permit-file-read="$TEMPD/def.ps" \
   -sDEVICE=pdfwrite -sOutputFile="$OUTPUT" "$TEMPD/temp.pdf" "$TEMPD/def.ps" 2>&1 \
   || {
     echo 'ERROR: Attaching ISDOC and Converting to PDF/A-3B Failed'
