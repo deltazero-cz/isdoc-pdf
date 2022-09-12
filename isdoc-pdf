@@ -23,7 +23,7 @@ ISDOC=$(realpath "$2")
 OUTPUT=$3
 [[ -z "$OUTPUT" ]] && OUTPUT="${INPUT%.pdf}.isdoc.pdf"
 TEMPD=$(mktemp -d)
-ICCFILE="$(realpath "./rgb.icc")"
+ICCFILE="$(realpath "$(dirname "$0")/rgb.icc")"
 
 ### checks
 
