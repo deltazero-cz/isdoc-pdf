@@ -155,7 +155,7 @@ gs \
   }
 
 gs \
-  -dQUIET -dBATCH -dNOPAUSE -dNOOUTERSAVE \
+  -dQUIET -dBATCH -dNOPAUSE -dNOOUTERSAVE -dNOSAFER \
   -dPDFA=3 -dCompatibilityLevel=1.7 -dPDFACompatibilityPolicy=1 \
   -sColorConversionStrategy=RGB \
   -sDEVICE=pdfwrite -sOutputFile="$OUTPUT" "$TEMPD/temp.pdf" "$TEMPD/def.ps" 2>&1 \
