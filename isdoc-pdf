@@ -13,8 +13,8 @@ realpath() {
 ### usage
 
 if [[ -z "$1" ]] || [[ -z "$2" ]]; then
-  echo "Attach ISDOC to a PDF and convert to PDF/A-3B"
-  echo "Usage: $0 invoice.pdf invoice.isdoc [invoice.isdoc.pdf]"
+  echo "Attach ISDOC to a PDF and convert it to PDF/A-3B standard"
+  echo "Usage: $0 input.pdf input.isdoc [output.isdoc.pdf]"
   exit 1
 fi
 
@@ -123,7 +123,6 @@ def
 % assign the file information
 [{myfileinfo} <<
     /Type /Filespec
-%    /Desc (My Optional Description) % optional, see page 103, table 44
     /F MyFileName
     /UF MyFileName
     /AFRelationship /Alternative
@@ -152,6 +151,7 @@ gs \
   -sOutputFile="$TEMPD/temp.pdf" "$INPUT" 2>&1 \
   || {
     echo 'ERROR: Compressing & Flattening PDF Failed'
+    rm -r "$TEMPD"
     exit 1
   }
 
@@ -163,11 +163,14 @@ gs \
   -sOutputFile="$OUTPUT" "$TEMPD/temp.pdf" "$TEMPD/def.ps" 2>&1 \
   || {
     echo 'ERROR: Attaching ISDOC and Converting to PDF/A-3B Failed'
+    rm -r "$TEMPD"
     exit 1
   }
 
 ### clean up
 
-rm -r "$TEMPD"
+[[ -d "$TMPDIR" ]] && rm -r "$TEMPD"
+
+### happy ending
 
 echo "Successfully attached & Converted into ${OUTPUT}"
