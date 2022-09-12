@@ -9,6 +9,8 @@ ISDOC is a XML based Invoicing Standard of the Czech Republic (EU), simillar to 
 - Bash-compatible shell
 - Ghostscript 9.27 + or alter
 
+Tested on Ubuntu 20.04 LTS, Debian Buster, macOS Mojave (please add more you know of)
+
 ### Installation
 
 Clone this repo or [download a zip](https://github.com/deltazero-cz/isdoc-pdf/archive/master.zip),
