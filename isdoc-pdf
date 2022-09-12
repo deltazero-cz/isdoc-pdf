@@ -147,8 +147,7 @@ gs \
   -sColorConversionStrategy=RGB \
   -dDownsampleMonoImages=false -dDownsampleGrayImages=false -dDownsampleColorImages=false \
   -dAutoFilterColorImages=false -dAutoFilterGrayImages=false \
-  -sDEVICE=pdfwrite \
-  -sOutputFile="$TEMPD/temp.pdf" "$INPUT" 2>&1 \
+  -sDEVICE=pdfwrite -sOutputFile="$TEMPD/temp.pdf" "$INPUT" 2>&1 \
   || {
     echo 'ERROR: Compressing & Flattening PDF Failed'
     rm -r "$TEMPD"
@@ -157,10 +156,10 @@ gs \
 
 gs \
   -dQUIET -dBATCH -dNOPAUSE -dNOOUTERSAVE \
-  -sDEVICE=pdfwrite -dPDFA=3 -dCompatibilityLevel=1.7 -dPDFACompatibilityPolicy=1 \
-  -sProcessColorModel=DeviceRGB -sColorConversionStrategy=RGB -sOutputICCProfile="$ICCFILE" \
+  -dPDFA=3 -dCompatibilityLevel=1.7 -dPDFACompatibilityPolicy=1 \
+  -sColorConversionStrategy=RGB \
   --permit-file-read="$ISDOC" --permit-file-read="$ICCFILE" --permit-file-read="$TEMPD/def.ps" \
-  -sOutputFile="$OUTPUT" "$TEMPD/temp.pdf" "$TEMPD/def.ps" 2>&1 \
+  -sDEVICE=pdfwrite -sOutputFile="$OUTPUT" "$TEMPD/temp.pdf" "$TEMPD/def.ps" 2>&1 \
   || {
     echo 'ERROR: Attaching ISDOC and Converting to PDF/A-3B Failed'
     rm -r "$TEMPD"
