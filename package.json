@@ -1,0 +1,11 @@
+{
+  "name": "isdoc-pdf",
+  "version": "1.0.0",
+  "description": "Attach ISDOC to a PDF and convert it to PDF/A-3B standard.",
+  "author": "ΔO - David Obdržálek <david@deltazero.cz>",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/deltazero-cz/isdoc-pdf.git"
+  }
+}
