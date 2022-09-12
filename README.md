@@ -6,8 +6,8 @@ ISDOC is a XML based Invoicing Standard of the Czech Republic (EU), simillar to 
 
 ### Requirements
 
-- A Bash-compatible shell
-- A recent version of Ghostscript (at least 9.14, further details here)
+- Bash-compatible shell
+- Ghostscript 9.27 + or alter
 
 ### Installation
 
@@ -39,4 +39,4 @@ If you want to run this script silently, direct stdout to /dev/null
 This package is based upon code fragments & inspiration from:
  - [pdf2archive](https://github.com/matteosecli/pdf2archive) by [Matteo Seclì](https://github.com/matteosecli)
  - [PDF/A PostScript](https://stackoverflow.com/a/58814712/3290062) by [KenS](https://stackoverflow.com/users/701996/kens)
- - [GhostScript blogpost on ZUGFeRD](https://www.ghostscript.com/blog/zugferd.html)
+ - [Ghostscript blogpost on ZUGFeRD](https://www.ghostscript.com/blog/zugferd.html)
