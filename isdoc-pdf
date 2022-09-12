@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# isdoc-pdf
+# isdoc-pdf 1.0.0
 # Copyright 2022 David Obdržálek [delta zero]
 # ISC License, see LICENCE file
 
@@ -13,7 +13,7 @@ realpath() {
 ### usage
 
 if [[ -z "$1" ]] || [[ -z "$2" ]]; then
-  echo "Attach ISDOC to a PDF and convert it to PDF/A-3B standard"
+  echo "isdoc-pdf 1.0.0, attach ISDOC to a PDF and convert it to PDF/A-3B standard"
   echo "Usage: $0 input.pdf input.isdoc [output.isdoc.pdf]"
   exit 1
 fi
