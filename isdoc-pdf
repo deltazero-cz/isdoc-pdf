@@ -1,0 +1,173 @@
+#!/usr/bin/env bash
+
+# isdoc-pdf
+# Copyright 2022 David Obdržálek [delta zero]
+# ISC License, see LICENCE file
+
+## helper methods
+
+realpath() {
+  [[ $1 = /* ]] && echo "$1" || echo "$PWD/${1#./}"
+}
+
+### usage
+
+if [[ -z "$1" ]] || [[ -z "$2" ]]; then
+  echo "Attach ISDOC to a PDF and convert to PDF/A-3B"
+  echo "Usage: $0 invoice.pdf invoice.isdoc [invoice.isdoc.pdf]"
+  exit 1
+fi
+
+INPUT=$1
+ISDOC=$(realpath "$2")
+OUTPUT=$3
+[[ -z "$OUTPUT" ]] && OUTPUT="${INPUT%.pdf}.isdoc.pdf"
+TEMPD=$(mktemp -d)
+ICCFILE="$(realpath "./rgb.icc")"
+
+### checks
+
+if [[ ! -f "$INPUT" ]]; then
+  echo "ERROR: No such File: $INPUT";
+  exit 1
+fi
+
+if [[ ! -f "$ISDOC" ]]; then
+  echo "ERROR: No such File: $ISDOC"
+  exit 1
+fi
+
+if [ ! -f "$ICCFILE" ]; then
+  echo "ERROR: Missing File: rgb.icc"
+  exit 1
+fi
+
+if [ -z "$(which gs)" ]; then
+  echo "ERROR: Ghostscript [gs] is not installed or it's not in the path"
+  exit 1
+fi
+
+### create def.ps
+
+ISDOCSIZE="$(wc -c < "$ISDOC" | sed 's/ //g')"
+if [[ -z "$ISDOCSIZE" ]]; then
+  echo "ERROR: Unable to calculate ISDOC size"
+  exit 1
+fi
+
+ISDOCTIME="$(date -r "$ISDOC" +"%Y%m%d%H%M%S%z" | sed -e "s/00$/'00/")"
+if [[ -z "$ISDOCTIME" ]]; then
+  echo "ERROR: Unable to calculate ISDOC modification time"
+  exit 1
+fi
+
+echo \
+"%!
+% This is a modified version of the Ghostscript 9.27 PDFA_def.ps file with
+% that creates a PDF/A-3 file with an embedded attachment
+
+% Define entries in the document Info dictionary :
+/ICCProfile ($ICCFILE) % Customize
+def
+
+% Define an ICC profile :
+
+[/_objdef {icc_PDFA} /type /stream /OBJ pdfmark
+[{icc_PDFA}
+<<
+  /N currentpagedevice /ProcessColorModel known {
+    currentpagedevice /ProcessColorModel get dup /DeviceGray eq
+    {pop 1} {
+      /DeviceRGB eq
+      {3}{4} ifelse
+    } ifelse
+  } {
+    (ERROR, unable to determine ProcessColorModel) == flush
+  } ifelse
+>> /PUT pdfmark
+[{icc_PDFA} ICCProfile (r) file /PUT pdfmark
+
+% Define the output intent dictionary :
+
+[/_objdef {OutputIntent_PDFA} /type /dict /OBJ pdfmark
+[{OutputIntent_PDFA} <<
+  /Type /OutputIntent                 % Must be so (the standard requires).
+  /S /GTS_PDFA1                       % Must be so (the standard requires).
+  /DestOutputProfile {icc_PDFA}       % Must be so (see above).
+  /OutputConditionIdentifier (sRGB)   % Customize
+>> /PUT pdfmark
+
+% Attach XML
+
+/MyFileName (invoice.isdoc) def
+/MyFileToEmbed ($ISDOC) def
+/MyMimeType (application/xml) def
+
+% Define the embedded file objects
+[/_objdef {myfileinfo} /type /dict /OBJ pdfmark
+[/_objdef {fstream} /type /stream  /OBJ pdfmark
+
+% Load the file to embed
+[{fstream} MyFileToEmbed (r) file  /PUT pdfmark
+
+% assign the stream information
+[{fstream} <<
+    /Type /EmbeddedFile
+    /Subtype MyMimeType cvn
+    /Params <<
+      /Size $ISDOCSIZE
+      /ModDate (D:$ISDOCTIME)
+    >>
+  >> /PUT pdfmark
+
+% assign the file information
+[{myfileinfo} <<
+    /Type /Filespec
+%    /Desc (My Optional Description) % optional, see page 103, table 44
+    /F MyFileName
+    /UF MyFileName
+    /AFRelationship /Alternative
+    /EF <<
+      /F {fstream}
+    >>
+  >> /PUT pdfmark
+
+% Embed the stream
+[/Name MyFileName /FS {myfileinfo} /EMBED pdfmark
+[{fstream} /CLOSE pdfmark
+
+% Updated last line from the original PDFA_defs.ps
+[{Catalog} <</OutputIntents [ {OutputIntent_PDFA} ] /AF [{myfileinfo}] >> /PUT pdfmark
+" > "$TEMPD/def.ps"
+
+gs \
+  -dQUIET -dBATCH -dNOPAUSE -dNOOUTERSAVE \
+  -dCompatibilityLevel=1.7 \
+  -dEmbedAllFonts=true -dSubsetFonts=true \
+  -dCompressFonts=true -dCompressPages=true \
+  -sColorConversionStrategy=RGB \
+  -dDownsampleMonoImages=false -dDownsampleGrayImages=false -dDownsampleColorImages=false \
+  -dAutoFilterColorImages=false -dAutoFilterGrayImages=false \
+  -sDEVICE=pdfwrite \
+  -sOutputFile="$TEMPD/temp.pdf" "$INPUT" 2>&1 \
+  || {
+    echo 'ERROR: Compressing & Flattening PDF Failed'
+    exit 1
+  }
+
+gs \
+  -dQUIET -dBATCH -dNOPAUSE -dNOOUTERSAVE \
+  -sDEVICE=pdfwrite -dPDFA=3 -dCompatibilityLevel=1.7 -dPDFACompatibilityPolicy=1 \
+  -sProcessColorModel=DeviceRGB -sColorConversionStrategy=RGB -sOutputICCProfile="$ICCFILE" \
+  --permit-file-read="$ISDOC" --permit-file-read="$ICCFILE" --permit-file-read="$TEMPD/def.ps" \
+  -sOutputFile="$OUTPUT" "$TEMPD/temp.pdf" "$TEMPD/def.ps" 2>&1 \
+  || {
+    echo 'ERROR: Attaching ISDOC and Converting to PDF/A-3B Failed'
+    exit 1
+  }
+
+### clean up
+
+rm -r "$TEMPD"
+
+echo "Successfully attached & Converted into ${OUTPUT}"
