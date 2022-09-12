@@ -11,7 +11,7 @@ ISDOC is a XML based Invoicing Standard of the Czech Republic (EU), simillar to 
 
 ### Installation
 
-Clone this repo or [download a zip](https://github.com/deltazero/isdoc-pdf/archive/master.zip),
+Clone this repo or [download a zip](https://github.com/deltazero-cz/isdoc-pdf/archive/master.zip),
 make sure `isdoc-pdf` is executable by `chmod +x isdoc-pdf`.
  
 Don't forget to install Ghostscript (9.27 or later).
